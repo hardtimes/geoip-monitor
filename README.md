@@ -1,6 +1,25 @@
-# IP Monitor Plugin for Noctalia
+# GeoIP Monitor Plugin for Noctalia
 
 A lightweight, configurable status bar widget for Noctalia Shell that displays your external IP address and geographical location (City, State/Region) with real-time polling and instant manual cache refresh.
+
+---
+
+
+## How it works:
+1. Queryies https://api.ipify.org for your external IP at the configured interval and notes it in a cache.
+- This site has no limit on queries per day, but only provides IP.
+
+2. If the IP changes from the cache, it https://ipwho.is is queried for geographic and IP data.  This site limits queries to 1000 per 24hr without api key.  This data is:
+- Stored in the cache for continual display until the IP changes.
+- Is not refreshed from cache unless a new IP is detected via api.ipify.org.
+
+
+---
+
+## Requirements
+
+- curl
+- Network access to https://api.ipify.org, https://ipwho.is
 
 ---
 
@@ -35,26 +54,12 @@ To publish or install the plugin locally, organize the files as follows:
 After placing the files, load and enable the plugin via Noctalia's IPC interface:
 
 ```bash
-noctalia msg plugins disable local/ip-monitor
-noctalia msg plugins enable local/ip-monitor
+noctalia msg plugins disable pk/ip-monitor
+noctalia msg plugins enable pk/ip-monitor
 ```
 
 To configure options visually, navigate to:
-**Noctalia Settings** > **Panels** / **Widgets** > **IP Monitor**.
+**Noctalia Settings** > **Bar:** / **Widget List** > Add/modify GeoIP Monitor.
 
 ---
 
-## Architecture & How It Works
-
-1. **Initialization**: On startup, Noctalia invokes `update()`, setting the execution timer via `noctalia.setUpdateInterval(intervalSec * 1000)`.
-2. **Declarative Rendering**:
-   - `renderWidget()` inspects user configurations retrieved via `noctalia.getConfig()`.
-   - Constructs a UI tree using `ui.row` (horizontal bar) or `ui.column` (vertical bar).
-   - If `show_icon` is disabled, `ui.glyph` is excluded entirely from the node graph rather than rendered empty, preventing placeholder glyph errors.
-3. **Asynchronous Polling**:
-   - `noctalia.runAsync()` executes `curl -s https://ipwho.is/` off the main thread.
-   - Luau pattern matching extracts the `"ip"`, `"city"`, and `"region"` attributes from the returned JSON payload.
-   - Once data is parsed, state variables (`cachedIp`, `cachedCity`, `cachedRegion`) are updated and the widget re-renders.
-4. **Cache Invalidation**:
-   - Left-clicking the widget triggers `onClick()`.
-   - In-memory variables are reset to `nil`, displaying an immediate `"Loading..."` state before firing an asynchronous network request.
