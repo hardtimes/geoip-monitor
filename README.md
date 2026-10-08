@@ -13,6 +13,8 @@ A lightweight, configurable status bar widget for Noctalia Shell that displays y
 - Stored in the cache for continual display until the IP changes.
 - Is not refreshed from cache unless a new IP is detected via api.ipify.org.
 
+---
+![Preview](images/DemoImage.png)
 
 ---
 
@@ -33,19 +35,6 @@ A lightweight, configurable status bar widget for Noctalia Shell that displays y
 - **Reliable Geo-Lookup**: Queries `ipwho.is` asynchronously to prevent UI freezing and ensure accurate ISP/regional attribution without requiring an API key.
 - **Declarative UI**: Built using Noctalia v5's declarative `barWidget.render()` engine, automatically adapting between horizontal and vertical bar orientations.
 
----
-
-## Directory Structure
-
-To publish or install the plugin locally, organize the files as follows:
-
-```text
-~/.local/share/noctalia/plugins/local/ip-monitor/
-├── plugin.toml
-├── widget.luau
-└── translations/
-    └── en.json
-```
 
 ---
 
@@ -58,7 +47,9 @@ noctalia msg plugins disable pk/ip-monitor
 noctalia msg plugins enable pk/ip-monitor
 ```
 
-To configure options visually, navigate to:
+To configure options visually, use your middle mouse button to click on the widget.
+
+To add to your bar, navigate to:
 **Noctalia Settings** > **Bar:** / **Widget List** > Add/modify GeoIP Monitor.
 
 ---
