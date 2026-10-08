@@ -1,0 +1,49 @@
+id = "pk/geoip-monitor"
+name = "GeoIP Monitor"
+version = "1.2.2"
+plugin_api = 3
+author = "Local"
+
+[[widget]]
+id = "status"
+name = "IP Monitor"
+entry = "widget.luau"
+
+  [[widget.setting]]
+  key = "show_ip"
+  type = "boolean"
+  label_key = "settings.show_ip.label"
+  default = true
+
+  [[widget.setting]]
+  key = "show_city"
+  type = "boolean"
+  label_key = "settings.show_city.label"
+  default = true
+
+  [[widget.setting]]
+  key = "show_state"
+  type = "boolean"
+  label_key = "settings.show_state.label"
+  default = true
+
+  [[widget.setting]]
+  key = "show_icon"
+  type = "boolean"
+  label_key = "settings.show_icon.label"
+  default = true
+
+  [[widget.setting]]
+  key = "separator"
+  type = "string"
+  label_key = "settings.separator.label"
+  default = " | "
+
+  [[widget.setting]]
+  key = "interval"
+  type = "int"
+  label_key = "settings.interval.label"
+  default = 5
+  min = 1
+  max = 3600
+  step = 1
