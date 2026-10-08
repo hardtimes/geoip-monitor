@@ -1,5 +1,6 @@
 --!nonstrict
 
+local lastIpifyIp = nil
 local cachedIp = nil
 local cachedCity = nil
 local cachedRegion = nil
@@ -69,23 +70,41 @@ function update()
 
     renderWidget()
 
-    noctalia.runAsync({"curl", "-s", "https://ipwho.is/"}, function(result)
+    -- TIER 1: Lightweight tripwire check
+    noctalia.runAsync({"curl", "-s", "https://api.ipify.org"}, function(result)
         if result.exitCode == 0 then
-            local ip = string.match(result.stdout, '"ip"%s*:%s*"([^"]+)"')
-            local city = string.match(result.stdout, '"city"%s*:%s*"([^"]+)"')
-            local region = string.match(result.stdout, '"region"%s*:%s*"([^"]+)"')
+            local currentIp = string.gsub(result.stdout, "%s+", "")
+            
+            -- If the tripwire detects a change, fire Tier 2
+            if currentIp ~= lastIpifyIp then
+                lastIpifyIp = currentIp
+                
+                local showCity = noctalia.getConfig("show_city")
+                if showCity == nil then showCity = true end
+                local showState = noctalia.getConfig("show_state")
+                if showState == nil then showState = true end
 
-            if ip then
-                cachedIp = ip
+                -- TIER 2: Sole source of truth for display
+                noctalia.runAsync({"curl", "-s", "https://ipwho.is/"}, function(geoResult)
+                    if geoResult.exitCode == 0 then
+                        local ip = string.match(geoResult.stdout, '"ip"%s*:%s*"([^"]+)"')
+                        local city = string.match(geoResult.stdout, '"city"%s*:%s*"([^"]+)"')
+                        local region = string.match(geoResult.stdout, '"region"%s*:%s*"([^"]+)"')
+                        
+                        if ip then cachedIp = ip end
+                        cachedCity = city or "Unknown"
+                        cachedRegion = region or "Unknown"
+                        
+                        renderWidget()
+                    else
+                        cachedCity = "Geo Error"
+                        cachedRegion = "Geo Error"
+                        renderWidget()
+                    end
+                end)
+            else
+                -- IP unchanged; UI already rendered from cache, do nothing
             end
-            if city then
-                cachedCity = city
-            end
-            if region then
-                cachedRegion = region
-            end
-
-            renderWidget()
         else
             cachedCity = "Offline"
             cachedRegion = "Offline"
@@ -95,6 +114,7 @@ function update()
 end
 
 function onClick()
+    lastIpifyIp = nil
     cachedIp = nil
     cachedCity = nil
     cachedRegion = nil

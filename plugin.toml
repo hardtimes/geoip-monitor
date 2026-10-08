@@ -2,11 +2,11 @@ id = "pk/geoip-monitor"
 name = "GeoIP Monitor"
 version = "1.2.2"
 plugin_api = 3
-author = "Local"
+author = "pk"
 
 [[widget]]
 id = "status"
-name = "IP Monitor"
+name = "GeoIP Monitor"
 entry = "widget.luau"
 
   [[widget.setting]]
