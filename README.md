@@ -42,7 +42,7 @@ noctalia msg plugins disable pk/ip-monitor
 
 ## Notes
 
-![Preview](thumbnail.webp)
+![Preview](Images/ThumbnailScreenshot.png)
 
 * **Network Access:** This plugin spawns background `curl` processes to make outbound HTTPS requests to `api.ipify.org` and `ipwho.is`.
 
