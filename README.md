@@ -22,11 +22,8 @@ To add to your bar, navigate to:
 Left-clicking the widget on your status bar will immediately clear the local cache and force a manual network refresh.
 
 ```sh
-noctalia msg panel-toggle pk/ip-monitor
-
-noctalia msg plugins enable pk/ip-monitor
-
-noctalia msg plugins disable pk/ip-monitor
+noctalia msg plugins enable pk/geoip-monitor
+noctalia msg plugins disable pk/geoip-monitor
 ```
 
 ## Settings
