@@ -9,7 +9,7 @@ A lightweight, configurable status bar widget for Noctalia Shell that displays y
 1. Queryies https://api.ipify.org for your external IP at the configured interval and notes it in a cache.
 - This site has no limit on queries per day, but only provides IP.
 
-2. If the IP changes from the cache, it https://ipwho.is is queried for geographic and IP data.  This site limits queries to 1000 per 24hr without api key.  This data is:
+2. If the IP changes from the cache, https://ipwho.is is queried for geographic and IP data.  This site limits queries to 1000 per 24hr without api key.  This data is:
 - Stored in the cache for continual display until the IP changes.
 - Is not refreshed from cache unless a new IP is detected via api.ipify.org.
 
