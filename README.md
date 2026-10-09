@@ -55,6 +55,6 @@ noctalia msg plugins disable pk/ip-monitor
 
 2. If the IP changes, https://ipwho.is is queried for geographic and IP data.  This site limits queries to 1000 per 24hr without api key.  This data is:
 - Stored in the cache for continual display until the IP changes.
-- Is refreshed from cache unless a new IP is detected via api.ipify.org.
+- Refreshed from cache until a new IP is detected via api.ipify.org.
 
 
