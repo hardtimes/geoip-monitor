@@ -1,56 +1,70 @@
-# GeoIP Monitor Plugin for Noctalia
+# GeoIP Monitor
 
-A lightweight, configurable status bar widget for Noctalia Shell that displays your external IP address and geographical location (City, State/Region) with real-time polling and instant manual cache refresh.
+A lightweight status bar widget for Noctalia that displays your external IP address and geographical location (City, State/Region). It utilizes an efficient two-tier polling system to monitor for network changes without spamming rate-limited APIs.
 
+## Plugin
+
+| Field | Value |
+| --- | --- |
+| ID | `pk/geoip-monitor` |
+| Entries | Bar widget: `status` |
+
+## Requirements
+
+Install `curl` on `PATH`.
+
+## Usage
+
+To add to your bar, navigate to:
+**Noctalia Settings** > **Bar:** / **Widget List** > Add/modify "GeoIP Monitor".
+
+
+Left-clicking the widget on your status bar will immediately clear the local cache and force a manual network refresh.
+
+```sh
+noctalia msg panel-toggle pk/ip-monitor
+
+noctalia msg plugins enable pk/ip-monitor
+
+noctalia msg plugins disable pk/ip-monitor
+```
+
+## Settings
+
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `show_ip` | `boolean` | `true` | Toggles the display of the external IP address.
+
+ |
+| `show_city` | `boolean` | `true` | Toggles the display of the city name.
+
+ |
+| `show_state` | `boolean` | `true` | Toggles the display of the state or region name.
+
+ |
+| `show_icon` | `boolean` | `true` | Toggles the visibility of the globe icon in the status bar.
+
+ |
+| `separator` | `string` | `" | "` |
+| `interval` | `int` | `5` | The frequency (in seconds) to poll for IP changes. Min: 1, Max: 3600.
+
+ |
+
+## Notes
 ---
+![Preview](images/DemoImage.png)
 
+* **Network Access:** This plugin spawns background `curl` processes to make outbound HTTPS requests to `api.ipify.org` and `ipwho.is`.
+
+
+* **Rate Limiting Safeguards:** The plugin heavily caches results. It polls `api.ipify.org` at your defined interval as a lightweight tripwire, and only queries the heavier `ipwho.is` geolocation database when a new IP is actually detected.
 
 ## How it works:
-1. Queryies https://api.ipify.org for your external IP at the configured interval and notes it in a cache.
+1. Queryies https://api.ipify.org for your external IP at the configured interval.
 - This site has no limit on queries per day, but only provides IP.
 
 2. If the IP changes from the cache, https://ipwho.is is queried for geographic and IP data.  This site limits queries to 1000 per 24hr without api key.  This data is:
 - Stored in the cache for continual display until the IP changes.
 - Is not refreshed from cache unless a new IP is detected via api.ipify.org.
 
----
-![Preview](images/DemoImage.png)
-
----
-
-## Requirements
-
-- curl
-- Network access to https://api.ipify.org, https://ipwho.is
-
----
-
-## Features
-
-- **Granular Display Toggles**: Independently show or hide IP address, City, and State.
-- **Icon Visibility Control**: Toggle the status bar icon (`globe`) on or off dynamically without layout collapse.
-- **Custom Delimiter**: Configure any custom separator string between location and IP text (default: ` | `).
-- **Adjustable Polling Interval**: Configure poll rates from 1 to 3600 seconds via a graphical slider or configuration file.
-- **Click-to-Refresh**: Clicking the widget immediately clears local caches and triggers a fresh network query.
-- **Reliable Geo-Lookup**: Queries `ipwho.is` asynchronously to prevent UI freezing and ensure accurate ISP/regional attribution without requiring an API key.
-- **Declarative UI**: Built using Noctalia v5's declarative `barWidget.render()` engine, automatically adapting between horizontal and vertical bar orientations.
-
-
----
-
-## Enabling and Managing
-
-After placing the files, load and enable the plugin via Noctalia's IPC interface:
-
-```bash
-noctalia msg plugins disable pk/ip-monitor
-noctalia msg plugins enable pk/ip-monitor
-```
-
-To configure options visually, use your middle mouse button to click on the widget.
-
-To add to your bar, navigate to:
-**Noctalia Settings** > **Bar:** / **Widget List** > Add/modify GeoIP Monitor.
-
----
 
