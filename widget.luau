@@ -71,44 +71,57 @@ function update()
     renderWidget()
 
     -- TIER 1: Lightweight tripwire check
-    noctalia.runAsync({"curl", "-s", "https://api.ipify.org"}, function(result)
+    -- -f: treat HTTP errors as failures; --max-time: don't hang forever
+    noctalia.runAsync({"curl", "-s", "-f", "--max-time", "5", "https://api.ipify.org"}, function(result)
+        local currentIp = ""
         if result.exitCode == 0 then
-            local currentIp = string.gsub(result.stdout, "%s+", "")
-            
-            -- If the tripwire detects a change, fire Tier 2
-            if currentIp ~= lastIpifyIp then
-                lastIpifyIp = currentIp
-                
-                local showCity = noctalia.getConfig("show_city")
-                if showCity == nil then showCity = true end
-                local showState = noctalia.getConfig("show_state")
-                if showState == nil then showState = true end
+            currentIp = string.gsub(result.stdout, "%s+", "")
+        end
 
-                -- TIER 2: Sole source of truth for display
-                noctalia.runAsync({"curl", "-s", "https://ipwho.is/"}, function(geoResult)
-                    if geoResult.exitCode == 0 then
-                        local ip = string.match(geoResult.stdout, '"ip"%s*:%s*"([^"]+)"')
-                        local city = string.match(geoResult.stdout, '"city"%s*:%s*"([^"]+)"')
-                        local region = string.match(geoResult.stdout, '"region"%s*:%s*"([^"]+)"')
-                        
-                        if ip then cachedIp = ip end
-                        cachedCity = city or "Unknown"
-                        cachedRegion = region or "Unknown"
-                        
-                        renderWidget()
-                    else
-                        cachedCity = "Geo Error"
-                        cachedRegion = "Geo Error"
-                        renderWidget()
-                    end
-                end)
-            else
-                -- IP unchanged; UI already rendered from cache, do nothing
-            end
-        else
+        -- Sanity check: IPv4/IPv6 characters only (guards against captive-portal HTML)
+        local valid = currentIp ~= "" and string.match(currentIp, "^[%x%.:]+$") ~= nil
+
+        if not valid then
             cachedCity = "Offline"
             cachedRegion = "Offline"
+            -- Forget the last IP so that when we're back online (even with the
+            -- same IP) Tier 2 reruns and overwrites "Offline"
+            lastIpifyIp = nil
             renderWidget()
+            return
+        end
+
+        -- If the tripwire detects a change (or the last lookup never succeeded), fire Tier 2
+        if currentIp ~= lastIpifyIp then
+            -- TIER 2: Sole source of truth for display
+            noctalia.runAsync({"curl", "-s", "-f", "--max-time", "8", "https://ipwho.is/"}, function(geoResult)
+                -- Rate-limited / failed lookups come back as {"success":false,...}
+                local failed = geoResult.exitCode ~= 0
+                    or string.find(geoResult.stdout, '"success"%s*:%s*false') ~= nil
+
+                local ip = nil
+                if not failed then
+                    ip = string.match(geoResult.stdout, '"ip"%s*:%s*"([^"]+)"')
+                end
+
+                if ip then
+                    local city = string.match(geoResult.stdout, '"city"%s*:%s*"([^"]+)"')
+                    local region = string.match(geoResult.stdout, '"region"%s*:%s*"([^"]+)"')
+
+                    cachedIp = ip
+                    cachedCity = city or "Unknown"
+                    cachedRegion = region or "Unknown"
+                    -- Only mark this IP as handled once geo actually succeeded
+                    lastIpifyIp = currentIp
+                else
+                    cachedCity = "Geo Error"
+                    cachedRegion = "Geo Error"
+                    -- Leave unset so the next tick retries
+                    lastIpifyIp = nil
+                end
+
+                renderWidget()
+            end)
         end
     end)
 end
@@ -121,3 +134,4 @@ function onClick()
     renderWidget()
     update()
 end
+
