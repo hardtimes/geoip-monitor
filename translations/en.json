@@ -1,8 +1,10 @@
 {
-  "settings.show_ip.label": "Show IP Address",
-  "settings.show_city.label": "Show City",
-  "settings.show_state.label": "Show State",
-  "settings.show_icon.label": "Show Icon",
-  "settings.separator.label": "Separator Character",
-  "settings.interval.label": "Polling Interval (seconds)"
+  "settings": {
+    "show_ip": { "label": "Show IP address" },
+    "show_city": { "label": "Show city" },
+    "show_state": { "label": "Show state/region" },
+    "show_icon": { "label": "Show icon" },
+    "separator": { "label": "Separator" },
+    "interval": { "label": "Refresh interval (seconds)" }
+  }
 }
