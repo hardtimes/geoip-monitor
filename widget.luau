@@ -4,6 +4,7 @@ local lastIpifyIp = nil
 local cachedIp = nil
 local cachedCity = nil
 local cachedRegion = nil
+local geoInFlight = false
 
 local function getDisplayText(showCity, showState, showIp, separator)
     local geoParts = {}
@@ -91,10 +92,15 @@ function update()
             return
         end
 
-        -- If the tripwire detects a change (or the last lookup never succeeded), fire Tier 2
-        if currentIp ~= lastIpifyIp then
+        -- Fire Tier 2 only if the IP changed (or the last lookup never succeeded)
+        -- AND no geo request is already running
+        if currentIp ~= lastIpifyIp and not geoInFlight then
+            geoInFlight = true
+
             -- TIER 2: Sole source of truth for display
             noctalia.runAsync({"curl", "-s", "-f", "--max-time", "8", "https://ipwho.is/"}, function(geoResult)
+                geoInFlight = false -- cleared first so every path below releases it
+
                 -- Rate-limited / failed lookups come back as {"success":false,...}
                 local failed = geoResult.exitCode ~= 0
                     or string.find(geoResult.stdout, '"success"%s*:%s*false') ~= nil
