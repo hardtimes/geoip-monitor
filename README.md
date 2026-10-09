@@ -37,7 +37,7 @@ noctalia msg plugins disable pk/ip-monitor
 | `show_city` | `boolean` | `true` | Toggles the display of the city name.|
 | `show_state` | `boolean` | `true` | Toggles the display of the state or region name.|
 | `show_icon` | `boolean` | `true` | Toggles the visibility of the globe icon in the status bar.|
-| `separator` | `string` | `" | "` |
+| `separator` | `string` | `" \| "` | Separation between text and IP.|
 | `interval` | `int` | `5` | The frequency (in seconds) to poll for IP changes. Min: 1, Max: 3600.|
 
 ## Notes
